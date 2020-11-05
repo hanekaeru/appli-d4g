@@ -37,12 +37,11 @@
         <div class="row">
             <label class="three columns"><input v-on:change="displayInterfaceNum" type="checkbox"/><span class="label-body">Accès aux interfaces numériques </span></label>
             <label class="three columns"><input v-on:change="displayInfo" type="checkbox"/><span class="label-body">Accès à l'information </span></label>
-            <label class="three columns"><input v-on:change="displayCompInfo" type="checkbox"/><span class="label-body">Compétences Numériques</span></label>
-            <label class="three columns"><input v-on:change="displayCompAdmin" type="checkbox"/><span class="label-body">Compétences Administratives</span></label>
+            <label class="three columns"><input v-on:change="displayScoreAcces" type="checkbox"/><span class="label-body">Score Global Accès </span></label>
         </div>
         <div class="row">
-            <label class="three columns"><input v-on:change="displayIris" type="checkbox"/><span class="label-body">Données IRIS</span></label>
-            <label class="three columns"><input v-on:change="displayScoreAcces" type="checkbox"/><span class="label-body">Score Global Accès </span></label>
+            <label class="three columns"><input v-on:change="displayCompInfo" type="checkbox"/><span class="label-body">Compétences Numériques</span></label>
+            <label class="three columns"><input v-on:change="displayCompAdmin" type="checkbox"/><span class="label-body">Compétences Administratives</span></label>
             <label class="three columns"><input v-on:change="displayScoreComp" type="checkbox"/><span class="label-body">Score Global Compétences </span></label>
         </div>
         <button class="button-primary" @click="download">Télécharger en PDF</button>
@@ -115,7 +114,6 @@ export default {
   },
   methods:{
       showInformationsOfRow(laDonnee) {
-          console.log(laDonnee)
           this.clicLigne = laDonnee;
           document.getElementById("myModal").style.display = "block";
       },
@@ -131,6 +129,7 @@ export default {
         .then(function (response) {
             self.irisitems = response.data;
             self.getPosts();
+            self.sortPosts()
         })
         .catch(function (error) {
             console.log(error);
@@ -141,6 +140,7 @@ export default {
       },
       setPages(){
           let numberOfPages = Math.ceil(this.posts.length/this.perPage);
+          this.pages=[]
           for(let index=1; index <= numberOfPages; index++){
               this.pages.push(index);
           }
@@ -231,25 +231,13 @@ export default {
       },
       sortPosts(){
           this.posts.sort((a,b)=>{
-              if(this.tri=="croissant"){
-                if(a.nom_com < b.nom_com){
-                    return -1;
-                }else if(a.nom_com > b.nom_com){
-                    return 1;
-                }else return 0;
-              }else{
-                if(a.nom_com > b.nom_com){
-                    return -1;
-                }else if(a.nom_com < b.nom_com){
-                    return 1;
-                }else return 0;
-              }
+            if(a.nom_com < b.nom_com){
+                return -1;
+            }else if(a.nom_com > b.nom_com){
+                return 1;
+            }else return 0;
           });
-          if(this.tri=="croissant"){
-              this.tri="decroissant";
-          }else{
-              this.tri="croissant";
-          }
+
       },
       applyListenerFilters() {
             EventBus.$on('filter-by-region', region => {
@@ -263,6 +251,8 @@ export default {
                 }else{
                     this.posts=this.irisitems;
                 }
+                this.setPages();
+                this.sortPosts()
             });
             EventBus.$on('filter-by-dpt', dpt => {
                 if(dpt!=0){
@@ -275,6 +265,8 @@ export default {
                 }else{
                     this.posts=this.irisitems;
                 }
+                this.setPages()
+                this.sortPosts()
             });
             EventBus.$on('filter-by-ville', ville => {
                 this.posts=[];
@@ -283,10 +275,28 @@ export default {
                         this.posts.push(this.irisitems[i]);
                     }
                 }
+                this.setPages();
+                this.sortPosts()
             });
             EventBus.$on('change-reference-point', reference =>{
                 this.indicateur=reference;
             })
+            EventBus.$on('filter-by-postal-code', codePostal => {
+                this.posts=[];
+                for(let i = 0; i< this.irisitems.length; i++){
+                    if(this.irisitems[i].code_postal.length==5){
+                        if(this.irisitems[i].code_postal.indexOf(codePostal)==0){
+                            this.posts.push(this.irisitems[i]);
+                        }  
+                    }else{
+                        if("0".concat(this.irisitems[i].code_postal).indexOf(codePostal)==0){
+                            this.posts.push(this.irisitems[i]);
+                        }
+                    }
+                }
+                this.setPages()
+                this.sortPosts()
+            });
       },
       download(){
         const doc = new jsPDF();
@@ -296,13 +306,6 @@ export default {
             let post = this.posts[i];
             tab.push([post.nom_com,post.nom_iris, post.nom_reg, post.nom_dep, post.population, post.score_global_reg, post.access_inter_num_reg, post.access_info_reg, post.global_access_reg]);
         }
-        tab.sort((a,b)=>{
-            if(a.nom_com < b.nom_com){
-                return -1;
-            }else if(a.nom_com > b.nom_com){
-                return 1;
-            }else return 0;
-        });
         doc.autoTable({
             head:[["Commune","Iris", "Région", "Département", "Population", "Score Global", "Accès Numérique", "Accès Information", "Score d'accès"]],
             body:tab
@@ -315,13 +318,6 @@ export default {
             let post = this.posts[i];
             tab2.push([post.nom_com,post.nom_iris, post.nom_reg, post.nom_dep, post.population, post.score_global_reg, post.comp_admin_reg, post.comp_num_scol_reg, post.global_comp_reg]);
         }
-        tab2[0].sort((a,b)=>{
-            if(a.nom_com < b.nom_com){
-                return -1;
-            }else if(a.nom_com > b.nom_com){
-                return 1;
-            }else return 0;
-        });
         doc2.autoTable({
             head:[["Commune","Iris", "Région", "Département", "Population", "Score Global", "Compétences Administratives", "Compétences numériques", "Score de Compétences"]],
             body:tab2

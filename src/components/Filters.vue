@@ -10,9 +10,9 @@
                 <select id="selectDpt" style="display: none" class="columns" v-on:change="filterByDepartment">
                 </select>
                 <input class="columns" v-on:keyup="filterByVille" type="text" placeholder="Ville"/>
-                <input class="columns" v-on:change="filterByCodePostal" maxlength="5" type="text" placeholder="Code Postal"/>
+                <input class="columns" v-on:keyup="filterByCodePostal" maxlength="5" type="text" placeholder="Code Postal"/>
                 <select class="columns" v-on:change="changeReferencePoint">
-                    <option value="0">Point référence</option>
+                    <option value="Region">Point référence</option>
                     <option value="Departement">Département</option>
                     <option value="Region">Région</option>
                 </select>
@@ -68,7 +68,6 @@ export default {
             select.innerHTML+="<option value =\"" + departements[i] + "\">" + departements[i] + "</option>";
         }
         select.style.display="block";
-        console.log(event.target.value);
         EventBus.$emit('filter-by-region', event.target.value);
     },
     filterByDepartment: function(event){
@@ -78,8 +77,7 @@ export default {
         EventBus.$emit('filter-by-ville', event.target.value);        
     },
     filterByCodePostal: function(event){
-        alert(event.target.value);
-        //TODO : Faire la connexion avec DataTable 
+        EventBus.$emit('filter-by-postal-code', event.target.value);
     },
     changeReferencePoint: function(event){
         EventBus.$emit('change-reference-point',event.target.value);
@@ -131,7 +129,6 @@ export default {
     }
 
     .panel {
-        background-color: white;
         display: none;
         overflow: hidden;
         width: 100%;
