@@ -4,7 +4,7 @@
         <div class="panel">
             <div class="row">
                 <select id="selectReg" class="columns" v-on:change="filterByRegion">
-                    <option value="0">Region</option>
+                    <option value="0">Région (Toutes)</option>
                     <option v-for="region in regions" :key="region" :value="region">{{region}}</option>
                 </select>
                 <select id="selectDpt" style="display: none" class="columns" v-on:change="filterByDepartment">
@@ -12,13 +12,10 @@
                 <input class="columns" v-on:keyup="filterByVille" type="text" placeholder="Ville"/>
                 <input class="columns" v-on:keyup="filterByCodePostal" maxlength="5" type="text" placeholder="Code Postal"/>
                 <select class="columns" v-on:change="changeReferencePoint">
-                    <option value="Region">Point référence</option>
-                    <option value="Departement">Département</option>
-                    <option value="Region">Région</option>
+                    <option value="region">Point référence (défaut Région)</option>
+                    <option value="departement">Département</option>
+                    <option value="region">Région</option>
                 </select>
-            </div>
-            <div class="row">
-                <label><input v-on:change="getDonneesInfraCom" type="checkbox"/><span class="label-body">Données infra-communales</span></label>
             </div>
         </div>
     </div>
@@ -49,9 +46,9 @@ export default {
       }
   },
   methods: {
-    allRecords(){
-        this.quartiers = [] 
-        let self = this
+    allRecords() {
+        this.quartiers = [];
+        let self = this;
         axios.get('http://146.59.196.35:3000/api.php')
         .then(function (response) {
             self.quartiers = response.data;
@@ -63,34 +60,30 @@ export default {
     filterByRegion: function (event) {
         let select = document.getElementById("selectDpt");   
         let departements = this.getDepartmentByRegion(event.target.value);                
-        select.innerHTML="<option value=\"0\">Département</option>"
-        for(let i in departements){
-            select.innerHTML+="<option value =\"" + departements[i] + "\">" + departements[i] + "</option>";
+        select.innerHTML = "<option value=\"0\">Département</option>";
+        for (let i in departements) {
+            select.innerHTML += "<option value =\"" + departements[i] + "\">" + departements[i] + "</option>";
         }
         select.style.display="block";
         EventBus.$emit('filter-by-region', event.target.value);
     },
-    filterByDepartment: function(event){
+    filterByDepartment: function(event) {
         EventBus.$emit('filter-by-dpt', event.target.value);        
     },
-    filterByVille: function(event){
+    filterByVille: function(event) {
         EventBus.$emit('filter-by-ville', event.target.value);        
     },
-    filterByCodePostal: function(event){
+    filterByCodePostal: function(event) {
         EventBus.$emit('filter-by-postal-code', event.target.value);
     },
-    changeReferencePoint: function(event){
+    changeReferencePoint: function(event) {
         EventBus.$emit('change-reference-point',event.target.value);
     },
-    getDonneesInfraCom: function(event){
-        EventBus.$emit('get-donnees-infracom',event.target.checked);
-    },
-    getDepartmentByRegion: function(region){
-        let listDepartment = []
-        for(let i in this.quartiers){
-            if(this.quartiers[i].nom_reg==region){
-                if(listDepartment.includes(this.quartiers[i].nom_dep));
-                else{
+    getDepartmentByRegion: function(region) {
+        let listDepartment = [];
+        for (let i in this.quartiers) {
+            if (this.quartiers[i].nom_reg==region) {
+                if(!listDepartment.includes(this.quartiers[i].nom_dep)) {
                     listDepartment.push(this.quartiers[i].nom_dep);
                 }
             }
@@ -98,13 +91,10 @@ export default {
         return listDepartment;
     }
   },
-  mounted(){
+  mounted() {
       this.allRecords();
   }
-
 }
-
-
 </script>
 
 <style scoped>
@@ -112,7 +102,6 @@ export default {
         margin-right: auto;
         margin-left: auto;
     }
-
     .accordion {
         margin: 1.5em 0 1.5em 0;
         background-color: #eee;
@@ -123,25 +112,20 @@ export default {
         border: none;
         outline: none;
     }
-
     .active, .accordion:hover {
         background-color: #ccc;
     }
-
     .panel {
         display: none;
         overflow: hidden;
         width: 100%;
     }
-
     .filters {
         margin: 0 auto 0 auto;
         width: 75%;
     }
-
     .row select, .row input {
         margin-left: 0;
         height: auto;
     }
 </style>
-

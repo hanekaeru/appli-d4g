@@ -6,7 +6,6 @@
 </template>
 
 <script>
-
 export default {
   name: 'Footer',
   methods: {
@@ -25,11 +24,9 @@ export default {
     width: 100%;
     text-align: center;
   }
-
   footer p {
     color: white;
   }
-
   footer p, footer button {
     margin: 1em;
     display: inline-block;

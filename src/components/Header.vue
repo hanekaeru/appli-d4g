@@ -30,14 +30,12 @@ export default {
     background-color: #0a3e65;
     width: 100%;
   }
-
   .title {
     margin: auto;
     padding: .23em;
     float: left;
     color: whitesmoke;
   }
-
   .logos {
     padding: .3em 2rem .3em .3em;
     width: 230px;
@@ -46,17 +44,14 @@ export default {
     display: flex;
     border: 1px solid #d2d2d2;
   }
-
   .logos:hover {
     transform: scale(1.21);
     cursor: pointer;
   }
-
   #logo-green {
     margin: auto;
     width: 60px;
   }
-
   #logo-inr {
     margin: auto auto auto 1em;
     height: 45px;
